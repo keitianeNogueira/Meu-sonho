@@ -321,7 +321,10 @@ function avatar(o){
   const larg=x=>`translate(150 0) scale(${k} 1) translate(-150 0)`; // rosto mais largo ou mais fino
   const sob=escurecer(c,.15),sombra=escurecer(p,.22);
   let tras='',frente='';
-  if(o.estilo==='longo'){tras=`<path d="M58 70 q-14 70 -2 120 h188 q12 -50 -2 -120 z" fill="${c}"/>`;frente=`<path d="M70 92 q80 -78 160 0 q-20 -18 -80 -22 q-60 4 -80 22z" fill="${c}"/>`;}
+  let mechas='';
+  if(o.estilo==='longo'){tras=`<path d="M58 66 q92 -78 184 0 q22 80 8 176 h-200 q-14 -96 8 -176z" fill="${c}" stroke="#1b1638" stroke-width="4"/>`;
+    frente=`<path d="M64 116 q-6 -90 86 -94 q92 4 86 94 q-12 -40 -40 -54 q-22 22 -66 24 q-30 0 -48 -10 q-14 16 -18 40z" fill="${c}"/>`;
+    mechas=`<path d="M66 150 q-14 60 2 116 q16 6 28 -2 q-12 -56 -4 -108z M234 150 q14 60 -2 116 q-16 6 -28 -2 q12 -56 4 -108z" fill="${c}" stroke="#1b1638" stroke-width="4" stroke-linejoin="round"/>`;}
   else if(o.estilo==='cacheado'){tras=`<g fill="${c}">${[...Array(11)].map((_,i)=>{const a=Math.PI+i/10*Math.PI;return `<circle cx="${150+Math.cos(a)*96}" cy="${118+Math.sin(a)*90}" r="30"/>`}).join('')}</g>`;frente=`<g fill="${c}"><circle cx="105" cy="58" r="26"/><circle cx="150" cy="44" r="28"/><circle cx="195" cy="58" r="26"/></g>`;}
   else if(o.estilo==='coque'){tras=`<circle cx="150" cy="30" r="27" fill="${c}" stroke="#1b1638" stroke-width="4"/>`;frente=`<path d="M64 112 q-4 -86 86 -90 q90 4 86 90 q-20 -42 -86 -46 q-66 4 -86 46z" fill="${c}"/><path d="M100 60 q50 -26 100 0 M112 46 q38 -16 76 0" stroke="#ffffff" stroke-width="3" fill="none" opacity=".18"/>`;}
   else if(o.estilo==='bone'){frente=`<path d="M62 92 q88 -90 176 0z" fill="${o.bone||'#e5484d'}" stroke="#1b1638" stroke-width="5"/><path d="M228 88 q40 4 54 18 q-30 6 -60 -4z" fill="${o.bone||'#e5484d'}" stroke="#1b1638" stroke-width="5"/><circle cx="150" cy="38" r="7" fill="#1b1638"/>`;}
@@ -332,12 +335,13 @@ function avatar(o){
   const oc=o.oculos?`<g fill="none" stroke="#1b1638" stroke-width="5"><circle cx="118" cy="122" r="20"/><circle cx="182" cy="122" r="20"/><path d="M138 122 h24"/></g>`:'';
   const corpo=o.regata
     ?`<path d="M40 300 q4 -96 110 -100 q106 4 110 100z" fill="${p}" stroke="#1b1638" stroke-width="6"/>
-      <path d="M78 300 q0 -62 20 -84 l10 -3 q10 30 42 30 q32 0 42 -30 l10 3 q20 22 20 84z" fill="${cam}" stroke="#1b1638" stroke-width="5"/>`
+      <path d="M84 300 q2 -40 14 -58 l2 -40 h12 l2 40 q14 22 36 22 q22 0 36 -22 l2 -40 h12 l2 40 q12 18 14 58z" fill="${cam}" stroke="#1b1638" stroke-width="5" stroke-linejoin="round"/>`
     :`<path d="M40 300 q4 -96 110 -100 q106 4 110 100z" fill="${cam}" stroke="#1b1638" stroke-width="6"/>
       <path d="M122 202 l28 30 28 -30" fill="${p}" stroke="#1b1638" stroke-width="5"/>`;
   return `<g class="corpo">
     <g transform="${larg()}">${tras}</g>
     ${corpo}
+    ${mechas?`<g transform="${larg()}">${mechas}</g>`:''}
     <g transform="${larg()}">
       <ellipse cx="62" cy="128" rx="14" ry="18" fill="${p}" stroke="#1b1638" stroke-width="5"/>
       <ellipse cx="238" cy="128" rx="14" ry="18" fill="${p}" stroke="#1b1638" stroke-width="5"/>
@@ -350,7 +354,7 @@ function avatar(o){
     ${o.labio?`<path d="M146 136 q8 10 -2 16" stroke="${sombra}" stroke-width="4" fill="none" stroke-linecap="round"/>`:''}
     ${oc}
     <ellipse cx="98" cy="156" rx="13" ry="8" fill="#ff8a8a" opacity=".45"/><ellipse cx="202" cy="156" rx="13" ry="8" fill="#ff8a8a" opacity=".45"/>
-    <ellipse class="boca" cx="150" cy="172" rx="22" ry="13" fill="#7a1f2b" stroke="${o.labio||'#1b1638'}" stroke-width="${o.labio?6:5}"/>
+    <ellipse class="boca" cx="150" cy="172" rx="22" ry="13" fill="#7a1f2b" stroke="${o.labio||'#1b1638'}" stroke-width="${o.labio?4.5:5}" vector-effect="non-scaling-stroke"/>
   </g>`;
 }
 
@@ -960,37 +964,42 @@ function detectarPessoa(cv,caixa,genero){
   // pele
   const pp=coleta(fx0+w*.2,fx1-w*.2,fy0+h*.25,fy1-h*.2,(p,x,y)=>mask[y*W+x]);
   const pele=mediana(pp.length>20?pp:coleta(fx0+w*.25,fx1-w*.25,fy0+h*.35,fy1-h*.25,p=>p[0]+p[1]+p[2]>90));
-  if(pele){const [,,l]=rgb2hsl(...pele);res.peleReal=rgb2hex(hsl2rgb(24,.42+(.75-Math.min(.75,l))*.25,Math.min(.82,Math.max(.25,l-.1))));} // a claridade vem da foto; o tom é sempre de pele
+  if(pele){const [,,l]=rgb2hsl(...pele);res.peleReal=rgb2hex(hsl2rgb(24,.42+(.75-Math.min(.75,l))*.25,Math.min(.82,Math.max(.3,l-.03))));} // a claridade vem da foto; o tom é sempre de pele
   if(pele){const L=rgb2lab(...pele);let mel=null,md=1e9;
     // a câmera costuma clarear o rosto: compara a claridade com uma pequena correção
     OP.pele.forEach(([hx])=>{const q=rgb2lab(...hex2rgb(hx));const dd=Math.abs(L[0]-7-q[0]);if(dd<md){md=dd;mel=hx;}});res.pele=mel;}
-  // cabelo: faixa logo acima da testa
-  const band=coleta(fx0+w*.12,fx1-w*.12,fy0-h*.28,fy0+h*.06,(p,x,y)=>!mask[y*W+x]);
-  const area=Math.max(1,(w*.76)*(h*.34));
-  const cab=band.length>area*.18?mediana(band):null;
+  // cabelo: acima da testa (se aparecer) e dos lados do rosto
+  const lp=pele?rgb2hsl(...pele)[2]:.6;
+  const escuro=p=>rgb2hsl(...p)[2]<Math.max(.13,lp*.55); // mais escuro que a pele
+  const naoPele=(p,x,y)=>!mask[y*W+x];
+  let cand=fy0-h*.05>0?coleta(fx0+w*.12,fx1-w*.12,fy0-h*.28,fy0+h*.06,naoPele):[];
+  cand=cand.concat(coleta(fx0-w*.3,fx0+w*.03,fy0+h*.05,fy0+h*.5,naoPele),coleta(fx1-w*.03,fx1+w*.3,fy0+h*.05,fy0+h*.5,naoPele));
+  const escuros=cand.filter(escuro);
+  const cab=cand.length>20?(escuros.length>cand.length*.2?mediana(escuros):mediana(cand)):null;
   if(cab){
-    const [hu,sa,li]=rgb2hsl(...cab);
-    const lp=pele?rgb2hsl(...pele)[2]:.6,rel=li/lp; // cabelo comparado com a pele (a luz muda tudo)
-
+    const [hu,sa,li]=rgb2hsl(...cab),rel=li/lp;
     const quente=hu>=15&&hu<=65&&sa>.25; // só aceita cabelo claro/ruivo se a cor for mesmo quente
     res.cabelo=(quente&&li>.45&&hu>=30)?'#e8c25a':((hu<28||hu>340)&&sa>.4&&li>.22)?'#c47a2c':
       (!quente||li<.3||rel<.75)?'#1b1638':(li<.42)?'#2b1a10':'#5a3418';
-    // cabelo comprido: cor do cabelo dos lados do rosto, abaixo das orelhas
-    const parece=p=>Math.hypot(p[0]-cab[0],p[1]-cab[1],p[2]-cab[2])<42;
-    const lado=(a,b)=>{const t=coleta(a,b,fy0+h*.55,fy1+h*.35,()=>true);return t.length?t.filter(parece).length/t.length:0;};
-    const fl=lado(fx0-w*.45,fx0-w*.04),fr=lado(fx1+w*.04,fx1+w*.45);
-    res.longo=Math.max(fl,fr)>.42&&Math.min(fl,fr)>.18;
-  }else{res.cabelo=null;res.longo=false;}
-  // regata: muita pele nos ombros
-  const ombro=(a,b)=>{const t=coleta(a,b,fy1+h*.3,fy1+h*.75,()=>true);return t.length?t.filter(ehPele).length/t.length:0;};
-  if(fy1+h*.35<H)res.regata=(ombro(fx0-w*.7,fx0-w*.05)+ombro(fx1+w*.05,fx1+w*.7))/2>.4;
+  }else res.cabelo='#1b1638';
+  // cabelo comprido: cabelo dos lados do rosto, descendo até o pescoço/ombro
+  const pareceCab=p=>escuro(p)||(cab&&Math.hypot(p[0]-cab[0],p[1]-cab[1],p[2]-cab[2])<35);
+  const lado=(a,b)=>{const t=coleta(a,b,fy1-h*.15,fy1+h*.55,()=>true);return t.length?t.filter(pareceCab).length/t.length:0;};
+  const fl=lado(fx0-w*.4,fx0+w*.02),fr=lado(fx1-w*.02,fx1+w*.4);
+  res.longo=Math.max(fl,fr)>.28; // basta um lado (cabelo jogado para um lado também conta)
   // prendedor/enfeite colorido no cabelo
-  const topo=coleta(fx0-w*.1,fx1+w*.1,fy0-h*.75,fy0-h*.05,p=>{const [hu,sa,li]=rgb2hsl(...p);return sa>.45&&li>.25&&li<.85&&!ehPele(p);});
+  const topo=fy0-h*.12<0?[]:coleta(fx0-w*.1,fx1+w*.1,fy0-h*.75,fy0-h*.05,p=>{const [hu,sa,li]=rgb2hsl(...p);return sa>.45&&li>.25&&li<.85&&!ehPele(p);});
   const areaT=Math.max(1,(w*1.2)*(h*.7));
   if(topo.length>areaT*.012)res.prendedor=corDesenho(mediana(topo),{lMin:.35,lMax:.7,sMin:.55,sMul:1.3});
-  // roupa: abaixo do queixo
-  if(fy1+h*.45<H-3){
-    const cam=mediana(coleta(cx-w*.7,cx+w*.7,fy1+h*.45,H-1,(p,x,y)=>!mask[y*W+x]));
+  // roupa: só o peito (no meio), para não pegar a parede do fundo
+  if(fy1+h*.25<H-3){
+    const peito=coleta(cx-w*.5,cx+w*.5,fy1+h*.25,H-1,()=>true);
+    const comoPele=p=>ehPele(p)||(pele&&Math.hypot(p[0]-pele[0],p[1]-pele[1],p[2]-pele[2])<60&&rgb2hsl(...p)[2]>.3); // parecido com a pele do rosto
+    const fp=peito.filter(comoPele).length/Math.max(1,peito.length);
+    const ombro=(a,b)=>{const t=coleta(a,b,fy1+h*.3,fy1+h*.75,()=>true);return t.length?t.filter(comoPele).length/t.length:0;};
+    res.regata=fp>.42||(ombro(fx0-w*.7,fx0-w*.05)+ombro(fx1+w*.05,fx1+w*.7))/2>.4;
+    const tecido=peito.filter(p=>!comoPele(p)),claros=tecido.filter(p=>rgb2hsl(...p)[2]>.6);
+    const cam=res.regata?(claros.length>peito.length*.03?mediana(claros):[240,240,240]):mediana(tecido);
     if(cam){const [hu,sa,li]=rgb2hsl(...cam);let c;
       if(sa<.18||li<.12||li>.9)c=li>.55?'#ffffff':'#333333';
       else if(hu<15||hu>=345)c=li>.68?'#ff8ac0':'#e5484d';
@@ -1070,7 +1079,8 @@ function aplicarLook(r,origem){
     if(r.longo){if(look.estilo!=='cacheado')look.estilo='longo';}
     else if(look.estilo!=='cacheado'&&look.estilo!=='bone')look.estilo=(r.genero==='f'||r.prendedor)?'coque':'curto';}
   if(r.camisa)look.camisa=r.camisa;
-  ['rosto','olho','labio','regata','prendedor'].forEach(k=>{if(r[k]!==undefined)look[k]=r[k];});
+  ['rosto','olho','labio'].forEach(k=>{if(r[k]!==undefined)look[k]=r[k];});
+  look.regata=!!r.regata;look.prendedor=r.prendedor||null; // cada foto nova decide de novo
   if(r.genero){vozGenero=r.genero;marcarVoz();}
   desenhoFoto=r.desenho||null;desenhoBoca=r.boca||null;
   desenharPrevia();
